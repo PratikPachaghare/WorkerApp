@@ -14,6 +14,7 @@ app.use(express.json());
 import requestRoutes from './src/Routes/requestRoutes.js';
 import userRoutes from './src/Routes/userRoutes.js';
 import workerRoutes from './src/Routes/workerRoutes.js';
+import { addDefaultFieldsToUsers, addDefaultFieldsToWorkers } from './src/controllers/updating.js';
 
 connectionDb();
 
@@ -22,7 +23,8 @@ app.use('/api/users', userRoutes);
 app.use('/api/workers', workerRoutes);
 app.use('/api/requests', requestRoutes);
 
-
+// addDefaultFieldsToUsers();
+// addDefaultFieldsToWorkers();
 
 const PORT = process.env.PORT || 5000;
 

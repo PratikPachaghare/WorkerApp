@@ -12,13 +12,34 @@ import 'leaflet/dist/leaflet.css';
 import { OpenStreetMapProvider } from 'leaflet-geosearch';
 
 const UserRegister = () => {
+  const [Address,setAddress] = useState('Amravati');
   const [form, setForm] = useState({
     name: '',
     email: '',
     password: '',
     phone: '',
+    Address:{Address},
     coordinates: [77.7558, 20.9334],  // Default Bangalore
   });
+
+    const getPointedLocation = ()=>{
+     getAddressFromCoords(form.coordinates[1],form.coordinates[0]);
+  }
+
+
+   const getAddressFromCoords = async (lat, lng) => {
+    try {
+      const res = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`
+      );
+      const data = await res.json();
+      setAddress(data.display_name);
+      return data;
+    } catch (err) {
+      console.error("Error fetching address:", err);
+      return "Address not found";
+    }
+  };  
 
   const handleInput = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -99,30 +120,52 @@ const UserRegister = () => {
         <input type="password" name="password" placeholder="Password" required onChange={handleInput} />
         <input type="tel" name="phone" placeholder="Phone" required onChange={handleInput} />
 
-        <div className="map-section">
-            
-          <label>Select your location:</label>
-          <MapContainer
-            center={[form.coordinates[1], form.coordinates[0]]}
-            zoom={9}
-            scrollWheelZoom={true}
-            className="map"
-          >
-            <TileLayer
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-              attribution='&copy; OpenStreetMap contributors'
-            />
-            
-            <LocationMarker />
-          </MapContainer>
-
-          <div className="map-tools">
-            <p>Selected: Lat {form.coordinates[1].toFixed(4)}, Lng {form.coordinates[0].toFixed(4)}</p>
-            <button type="button" className="detect-btn" onClick={detectMyLocation}>
-              Detect My Location
-            </button>
-          </div>
-        </div>
+         <div className="map-section">
+                  <label>Select your location:</label>
+                  <MapContainer
+                    center={[form.coordinates[1], form.coordinates[0]]}
+                    zoom={9}
+                    scrollWheelZoom={true}
+                    className="map"
+                  >
+                    <TileLayer
+                      url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                      attribution="&copy; OpenStreetMap contributors"
+                    />
+                    <LocationMarker />
+                  </MapContainer>
+        
+                  <div className="map-tools">
+                    <p>
+                      Selected: Lat {form.coordinates[1].toFixed(4)}, Lng{" "}
+                      {form.coordinates[0].toFixed(4)}
+                    </p>
+        
+                  <input
+                  type="Address"
+                  name="Address"
+                  placeholder={Address}
+                  required
+                  disabled={true}
+                />
+                  <div className="flex gap-1">
+                    <button
+                      type="button"
+                      className="detect-btn"
+                      onClick={getPointedLocation}
+                    >
+                      get pointend location
+                    </button>
+                    <button
+                      type="button"
+                      className="detect-btn"
+                      onClick={detectMyLocation}
+                    >
+                      Detect My Location
+                    </button>
+                  </div>  
+                  </div>
+                </div>
 
         <button type="submit" className='detect-btn mt-2 m-auto justify-center'>Register</button>
       </form>

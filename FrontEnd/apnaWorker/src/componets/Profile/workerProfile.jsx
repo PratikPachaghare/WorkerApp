@@ -8,7 +8,10 @@ export const WorkerProfile = ({ worker }) => {
   const navigator = useNavigate();
   const handleLogout = ()=>{
     localStorage.removeItem("workerToken");
+    localStorage.removeItem("UserToken");
+    localStorage.removeItem("isWorker");
     navigator('/auth');
+    window.location.reload();
   }
 
   return (

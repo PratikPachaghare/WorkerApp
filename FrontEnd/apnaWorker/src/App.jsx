@@ -14,15 +14,57 @@ import RequestForm from './componets/Requast/RequestForm.jsx';
 
 function App() {
   const [token, setToken] = useState('');
+  const [isWorker,setIsWorker] = useState(false);
   const [Login, setLogin] = useState(false);
+  const [User,setUser] = useState({});
 
   useEffect(() => {
-    const storedToken = localStorage.getItem('workerToken');
+    const storedToken = (localStorage.getItem('workerToken') || localStorage.getItem('UserToken'));
     if (storedToken) {
       setToken(storedToken);
       setLogin(true);
     }
+    if(token){
+      getUserByToken(token);
+      console.log(User);
+    }
+
   }, []); // run only once on load
+
+const getUserByToken = async (token) => {
+  try {
+    const isWorkerFlag = localStorage.getItem("isWorker") === "true";
+    const url = isWorkerFlag
+      ? "http://localhost:3000/api/workers/getByToken"
+      : "http://localhost:3000/api/users/getByToken";
+
+    const res = await fetch(url, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.message || "Failed to fetch user/worker");
+    }
+
+    setUser(data); // based on backend response
+    setIsWorker(isWorkerFlag);
+    setLogin(true);
+
+    return data.user || data.worker;
+  } catch (error) {
+    console.error("❌ Error getting user by token:", error);
+    setLogin(false);
+    localStorage.removeItem("token");
+    localStorage.removeItem("isWorker");
+  }
+};
+
+
 
   return (
     <Router>

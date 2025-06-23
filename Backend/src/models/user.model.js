@@ -8,6 +8,8 @@ const userSchema = new mongoose.Schema({
     type: { type: String, enum: ['Point'], default: 'Point' },
     coordinates: { type: [Number], required: true } // [longitude, latitude]
   },
+  isWorker:{type:Boolean,default:false},
+  address:{type:String},
   createdAt: { type: Date, default: Date.now },
 });
 

@@ -5,7 +5,7 @@ import {User} from '../models/user.model.js';
 
 export const registerUser = async (req, res) => {
   try {
-    const { name, email, password, phone, location } = req.body;
+    const { name, email,address, password, longitude,latitude, phone} = req.body;
 
     const existingUser = await User.findOne({ email });
     if (existingUser) return res.status(400).json({ message: 'User already exists' });
@@ -17,7 +17,11 @@ export const registerUser = async (req, res) => {
       email,
       password: hashedPassword,
       phone,
-      location
+      location:{
+        type:"Point",
+        coordinates:[longitude,latitude]
+      },
+      address
     });
     await newUser.save();
 
@@ -26,21 +30,27 @@ export const registerUser = async (req, res) => {
         message: 'User registered successfully' 
     });
   } catch (err) {
+    console.log("error in registe User :",err);
     res.status(500).json({ message:"error in registerUser : ",err});
   }
 };
 
 export const loginUser = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { emailOrPhone, password } = req.body;
 
-    const user = await User.findOne({ email });
+    // Find user by email OR phone
+    const user = await User.findOne({
+      $or: [{ email: emailOrPhone }, { phone: emailOrPhone }]
+    });
+
     if (!user) return res.status(404).json({ message: 'User not found' });
 
     const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) return res.status(400).json({ message: 'Invalid credentials, Password not match' });
+    if (!isMatch) return res.status(400).json({ message: 'Invalid password' });
 
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '5d' });
+
     res.status(200).json({ token, user });
   } catch (err) {
     res.status(500).json({ error: err.message });

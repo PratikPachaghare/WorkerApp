@@ -25,6 +25,7 @@ const workerSchema = new mongoose.Schema({
       required: true,
     },
   },
+  isWorker:{type:Boolean,default:true},
   rating: { type: Number, default: 1 }, // avg rating
   totalRatings: { type: Number, default: 0 },
   ratingSum: { type: Number, default: 0 },

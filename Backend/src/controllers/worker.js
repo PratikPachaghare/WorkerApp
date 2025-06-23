@@ -64,10 +64,11 @@ export const registerWorker = async (req, res) => {
 
 export const loginWorker = async (req, res) => {
   try {
-    const { email, password } = req.body;
-    console.log(email," ",password);
-
-    const worker = await Worker.findOne({ email });
+   const { emailOrPhone, password } = req.body;
+   
+       const worker = await Worker.findOne({
+         $or: [{ email: emailOrPhone }, { phone: emailOrPhone }]
+       });
     if (!worker) return res.status(404).json({ message: 'Worker not found' });
 
     const isMatch = await bcrypt.compare(password, worker.password);
