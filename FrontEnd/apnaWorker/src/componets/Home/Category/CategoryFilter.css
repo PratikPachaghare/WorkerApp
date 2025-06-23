@@ -1,0 +1,78 @@
+.category-scroll::-webkit-scrollbar {
+  display: none;
+}
+.category-wrapper {
+  display: flex;
+  align-items: center;
+  position: relative;
+  width: 100%;
+  background-color: #fff;
+  padding: 10px;
+  gap: 10px; /* Optional: spacing between scroll area and buttons */
+  /* Remove overflow hidden */
+}
+
+.category-scroll {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  scrollbar-width: 300px;
+  -ms-overflow-style: none;
+  scroll-behavior: smooth;
+  flex-grow: 1;
+  max-width: 500px; /* allow full use of wrapper space */
+}
+
+
+.category-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.category-btn {
+  flex: 0 0 auto;
+  padding: 8px 16px;
+  border: 2px solid #c1c7ca;
+  border-radius: 20px;
+  background-color: #ffffffcc;
+  color: #333;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.category-btn:hover {
+  background-color: #f0f0f0;
+}
+
+.category-btn.active {
+  background-color: white;
+  color: #0077cc;
+  font-weight: bold;
+  border: 2px solid #0077cc;
+}
+
+.scroll-btn {
+  background-color: #d4dadd;
+  border: none;
+  padding: 6px 12px;
+  cursor: pointer;
+  font-size: 18px;
+  color: #333;
+  z-index: 2;
+  transition: background-color 0.2s;
+}
+
+.scroll-btn:hover {
+  background-color: #c1c7ca;
+}
+
+.scroll-btn.left {
+  margin-right: 8px;
+  border-radius:10px;
+}
+
+.scroll-btn.right {
+  margin-left: 8px;
+   border-radius:10px;
+}
