@@ -75,7 +75,8 @@ export const loginWorker = async (req, res) => {
     if (!isMatch) return res.status(400).json({ message: 'Invalid credentials, Password not match' });
 
     const token = jwt.sign({ id: worker._id }, process.env.JWT_SECRET, { expiresIn: '1d' });
-    res.status(200).json({ token, worker });
+    const { password: pwd, ...rest } = worker._doc;
+    res.status(200).json({ token, worker:rest });
   } catch (err) {
     console.log("erro in login worker : ",err);
     res.status(500).json({ message:"error in login worker ",err});

@@ -1,37 +1,33 @@
-import './App.css';
-import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import "./App.css";
+import React, { useState, useEffect } from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
-import Home from './pages/Home';
-import Auth from './pages/Auth';
-import Profile from './pages/Profile';
-import Requast from './pages/Requast';
-import Navbar from './componets/Navbar/Navbar';
-import About from './pages/About';
-import BottomNav from './componets/Navbar/BottomNav.jsx';
-import Footer from './componets/Footer/Footer.jsx';
-import RequestForm from './componets/Requast/RequestForm.jsx';
+import Home from "./pages/Home";
+import Auth from "./pages/Auth";
+import Profile from "./pages/Profile";
+import Requast from "./pages/Requast";
+import Navbar from "./componets/Navbar/Navbar";
+import About from "./pages/About";
+import BottomNav from "./componets/Navbar/BottomNav.jsx";
+import Footer from "./componets/Footer/Footer.jsx";
+import RequestForm from "./componets/Requast/RequestForm.jsx";
+import {useDispatch} from 'react-redux';
+import { isWorkers, login } from "./redux/userSlice.js";
 
 function App() {
-  const [token, setToken] = useState('');
-  const [isWorker,setIsWorker] = useState(false);
-  const [Login, setLogin] = useState(false);
-  const [User,setUser] = useState({});
+  const dispatch = useDispatch();
+  const [User, setUser] = useState({});
 
   useEffect(() => {
-    const storedToken = (localStorage.getItem('workerToken') || localStorage.getItem('UserToken'));
-    if (storedToken) {
-      setToken(storedToken);
-      setLogin(true);
+    let storedToken = localStorage.getItem("workerToken") || localStorage.getItem("UserToken");
+    const isWorker = localStorage.getItem("isWorker");
+    dispatch(isWorkers(isWorker));
+    if (storedToken) { 
+      getUserByToken(storedToken); // ✅ use correct token immediately
     }
-    if(token){
-      getUserByToken(token);
-      console.log(User);
-    }
-
   }, []); // run only once on load
 
-const getUserByToken = async (token) => {
+  const getUserByToken = async (token) => {
   try {
     const isWorkerFlag = localStorage.getItem("isWorker") === "true";
     const url = isWorkerFlag
@@ -39,36 +35,32 @@ const getUserByToken = async (token) => {
       : "http://localhost:3000/api/users/getByToken";
 
     const res = await fetch(url, {
-      method: "GET",
+      method: "POST", // ✅ FIXED from GET to POST
       headers: {
         Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
       },
     });
 
     const data = await res.json();
-
+    // console.log("✅ Response:", data);
     if (!res.ok) {
       throw new Error(data.message || "Failed to fetch user/worker");
     }
 
-    setUser(data); // based on backend response
-    setIsWorker(isWorkerFlag);
-    setLogin(true);
+    setUser(data);
+    dispatch(login(data)); // ✅ correct
 
-    return data.user || data.worker;
   } catch (error) {
-    console.error("❌ Error getting user by token:", error);
+    console.error("❌ Error getting user by token:", error.message);
     setLogin(false);
-    localStorage.removeItem("token");
-    localStorage.removeItem("isWorker");
   }
 };
 
 
-
   return (
     <Router>
-      <Navbar login={Login} />
+      <Navbar />
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/auth" element={<Auth />} />
@@ -78,7 +70,7 @@ const getUserByToken = async (token) => {
         <Route path="/sendRequest" element={<RequestForm />} />
       </Routes>
       <Footer />
-      <BottomNav login={Login} />
+      <BottomNav />
     </Router>
   );
 }

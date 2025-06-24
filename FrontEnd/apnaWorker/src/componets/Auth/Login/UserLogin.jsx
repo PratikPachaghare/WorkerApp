@@ -1,16 +1,16 @@
-import React, { useState } from 'react';
-import './UserLogin.css';
-import { toast, ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-import { useNavigate } from 'react-router-dom';
-import Loader from '../../Loder/Loader.jsx';
+import React, { useState } from "react";
+import "./UserLogin.css";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { useNavigate } from "react-router-dom";
+import Loader from "../../Loder/Loader.jsx";
 
 const UserLogin = () => {
   const navigate = useNavigate();
   const [Loading, setLoading] = useState(false);
   const [form, setForm] = useState({
-    email: '',
-    password: '',
+    email: "",
+    password: "",
     coordinates: [77.7558, 20.9334], // Optional if needed
   });
 
@@ -28,10 +28,10 @@ const UserLogin = () => {
         password: form.password,
       };
 
-      const res = await fetch('http://localhost:3000/api/users/login', {
-        method: 'POST',
+      const res = await fetch("http://localhost:3000/api/users/login", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(payload),
       });
@@ -39,31 +39,29 @@ const UserLogin = () => {
       const data = await res.json();
 
       if (res.ok) {
-        toast.success('Login successful');
-        localStorage.setItem('UserToken', data.token);
+        toast.success("Login successful");
+        localStorage.setItem("UserToken", data.token);
         localStorage.setItem("isWorker", data.user.isWorker);
         setLoading(false);
         setTimeout(() => {
-          navigate('/');
-        }, 1000); // Redirect after 2s
-        window.location.reload();
+          window.location.href = "/"; // full reload but maintains route
+        }, 1000);
       } else {
-        toast.error(data.message || 'Login failed');
+        toast.error(data.message || "Login failed");
         setLoading(false);
       }
     } catch (error) {
-      console.error('❌ Error during login:', error);
-      toast.error('Add info correct :Please try again .');
+      console.error("❌ Error during login:", error);
+      toast.error("Add info correct :Please try again .");
       setLoading(false);
     }
   };
 
   return (
     <div className="register-container">
-      {Loading && <Loader/>}
+      {Loading && <Loader />}
       <form className="register-form" onSubmit={handleSubmit}>
         <h2>Login Account</h2>
-
         <label htmlFor="Email">Email Or Phone</label>
         <input
           type="text"
@@ -86,10 +84,7 @@ const UserLogin = () => {
           onChange={handleInput}
         />
 
-        <button
-          type="submit"
-          className="detect-btn mt-2 m-auto justify-center"
-        >
+        <button type="submit" className="detect-btn mt-2 m-auto justify-center">
           Login
         </button>
       </form>

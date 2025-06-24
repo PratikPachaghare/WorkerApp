@@ -7,7 +7,7 @@ import { verifyToken } from '../middleware/userVerify.js';
 
 router.post('/register',upload.single("profileImage"), registerWorker);
 router.post('/login', loginWorker);
-router.post('/getBytoken',verifyToken,getWorkerByToken);
+router.post('/getByToken',verifyToken,getWorkerByToken);
 router.post('/getByID',getWorkerById);
 router.get('/getAll', getAll);
 router.get('/nearby', getNearbyWorkers);

@@ -38,16 +38,14 @@ const WorkerLogin = () => {
         toast.error("Invalid credentials");
         return;
       }
-
       localStorage.setItem("workerToken", data.token);
       localStorage.setItem("isWorker", data.worker.isWorker);
       console.log("Worker login successfully");
       toast.success("Login successful");
       setLoading(false);
       setTimeout(() => {
-        navigator("/");
-        window.location.reload();
-      }, 1000);
+          window.location.href = "/"; // full reload but maintains route
+        }, 1000);
     } catch (error) {
       setLoading(false);
       console.error("Error in handleLogin:", error);
@@ -64,7 +62,7 @@ const WorkerLogin = () => {
       <form className="register-form" onSubmit={handleLogin}>
         <h2>Login Account</h2>
         <label htmlFor="Email">Email Or Phone</label>
-        <input type="email" name="email" id='Email' placeholder="Email or Phone" required onChange={handleInput} />
+        <input type="text" name="email" id='Email' placeholder="Email or Phone" required onChange={handleInput} />
         <label htmlFor="Password">Password</label>
         <input type="password" name="password" id='Password' placeholder="Password" required onChange={handleInput} />
         <button type="submit" className='detect-btn mt-2 m-auto justify-center'>

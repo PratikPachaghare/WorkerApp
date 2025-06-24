@@ -4,8 +4,12 @@ import { NavLink } from 'react-router-dom';
 import { FaUserCircle } from 'react-icons/fa';
 import './Navbar.css';
 import logo_img from '../../Assets/logo.jpg'
+import { useSelector } from 'react-redux';
 
-const Navbar = ({ user,login }) => {
+const Navbar = () => {
+  const user = useSelector((state)=> state.user.userData);
+  console.log("user in the Navbar : ",user);
+  const login = useSelector((state)=> state.user.isLoggedIn);
   return (
     <nav className="navbar">
       <div className="navbar-left">
