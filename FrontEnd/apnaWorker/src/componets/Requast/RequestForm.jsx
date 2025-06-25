@@ -8,7 +8,7 @@ import CardShow from "./workerDetailCard";
 
 const RequestForm = ({ userId }) => {
   const location = useLocation();
-  const { worker } = location.state || {};
+  const { worker,data } = location.state || {};
 
   const [image, setImage] = useState(null);
 
@@ -128,7 +128,7 @@ const RequestForm = ({ userId }) => {
               <input
                 name="worker"
                 // value={workers.name}
-                value={worker.category}
+                value={worker.categories}
                 onChange={handleChange}
                 required
                 disabled={true}
@@ -138,7 +138,7 @@ const RequestForm = ({ userId }) => {
               <input
                 name="worker"
                 // value={workers.name}
-                value={worker.Location}
+                value={worker.address}
                 onChange={handleChange}
                 required
                 disabled={true}

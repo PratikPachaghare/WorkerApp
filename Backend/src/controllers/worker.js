@@ -120,9 +120,10 @@ export const getAll = async (req, res) => {
 };
 
 export const getNearbyWorkers = async (req, res) => {
-  const { longitude, latitude, page = 1, limit = 20 } = req.body;
-
+  const { longitude, latitude, page = 1, limit = 20 } = req.query;
+    console.log(longitude,latitude,page ,limit);
   if (!longitude || !latitude) {
+    console.log("location required");
     return res.status(400).json({ message: 'Longitude and latitude are required' });
   }
 

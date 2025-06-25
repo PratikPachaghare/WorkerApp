@@ -10,14 +10,15 @@ const CardShow = ({worker}) => {
     <div className="card-show-container">
       <button onClick={() => navigate(-1)} className="back-button">← Back</button>
       <div className="card-show">
-        <img src={worker_image} alt="Amit Sharma" className="card-show-image" />
+        <img src={worker.profileImage} alt="Amit Sharma" className="card-show-image" />
         <div className="card-show-details">
-          <h2>{worker.name}</h2>
-          <p><strong>Address:</strong> Delhi, India</p>
-          <p><strong>Description:</strong> Expert in household repairs and maintenance. Specializes in residential electrical systems with over 10 years of experience.</p>
-          <p><strong>Rating:</strong> <span className="yellow-text">4.5★</span></p>
-          <p><strong>category:</strong> {worker.category}</p>
-          <p><strong>Subcategory:</strong> House wiring, AC Reapir, Electrician</p>
+          <h2><strong>Name:</strong> {worker.name}</h2>
+          <p><strong>Gender:</strong> {worker.gender}</p>
+          <p><strong>Address:</strong> {worker.address}</p>
+          <p><strong>Rating:</strong> <span className="yellow-text"> {worker.rating}★</span></p>
+          <p><strong>category:</strong> {worker.categories}</p>
+          <p><strong>Subcategory:</strong> {worker.subcategories}</p>
+          <p><strong>Description:</strong> {worker.description}</p>
         </div>
       </div>
     </div>
