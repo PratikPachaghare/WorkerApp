@@ -4,11 +4,13 @@ const requestSchema = new mongoose.Schema({
   user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   worker: { type: mongoose.Schema.Types.ObjectId, ref: 'Worker', required: true },
   message: { type: String },
-  requestedTime: { type: Date, required: true }, // When user wants the service
+  requestedTime: { type: Date, required: true }, // Combined date + time
   location: {
     type: { type: String, enum: ['Point'], default: 'Point' },
     coordinates: { type: [Number], required: true }
   },
+  address: { type: String }, // human-readable address like "Amravati"
+  image: { type: String },   // image URL if uploaded (optional)
   status: { 
     type: String, 
     enum: ['pending', 'accepted', 'rejected', 'completed'], 
@@ -19,5 +21,4 @@ const requestSchema = new mongoose.Schema({
 
 requestSchema.index({ location: "2dsphere" });
 
-export const Request= mongoose.model('Request', requestSchema);
-
+export const Request = mongoose.model('Request', requestSchema);

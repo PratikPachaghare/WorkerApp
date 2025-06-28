@@ -1,6 +1,6 @@
 import "./App.css";
 import React, { useState, useEffect } from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, useNavigate, Navigate } from "react-router-dom";
 
 import Home from "./pages/Home";
 import Auth from "./pages/Auth";
@@ -23,11 +23,11 @@ function App() {
     const isWorker = localStorage.getItem("isWorker");
     dispatch(isWorkers(isWorker));
     if (storedToken) { 
-      getUserByToken(storedToken); // ✅ use correct token immediately
+      getUserByToken(storedToken,isWorker); 
     }
-  }, []); // run only once on load
+  }, []); 
 
-  const getUserByToken = async (token) => {
+  const getUserByToken = async (token,isWorker) => {
   try {
     const isWorkerFlag = localStorage.getItem("isWorker") === "true";
     const url = isWorkerFlag
@@ -43,7 +43,7 @@ function App() {
     });
 
     const data = await res.json();
-    // console.log("✅ Response:", data);
+    console.log("✅ Response:", data);
     if (!res.ok) {
       throw new Error(data.message || "Failed to fetch user/worker");
     }
@@ -53,7 +53,10 @@ function App() {
 
   } catch (error) {
     console.error("❌ Error getting user by token:", error.message);
-    setLogin(false);
+    // localStorage.removeItem("workerToken");
+    // localStorage.removeItem("UserToken");
+    // localStorage.removeItem("isWorker");
+    // window.location.href = "/auth";
   }
 };
 

@@ -22,7 +22,7 @@ const WorkerCard = ({ worker }) => {
 }
 </p>
     <div className='flex justify-center gap-2 '>
-      <p className='m-1 mt-3 text-blue-700 '>{worker.category}</p>
+      <p className='m-1 mt-3 text-blue-700 '>{worker.categories}</p>
       <button>Book Now</button>
     </div>
   </div>

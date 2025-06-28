@@ -8,7 +8,7 @@ import { logout } from '../../redux/userSlice';
 
 export const WorkerProfile = () => {
   const user = useSelector((state)=>state.user.userData);
-  const isWorker = useSelector((state)=> state.user.isWorker);
+  const isWorker = useSelector((state)=> state.user.isWorkers);
   console.log("navbar isWorker", isWorker);
   const dispatch = useDispatch();
   const navigator = useNavigate();
@@ -70,20 +70,16 @@ export const WorkerProfile = () => {
         </div>
       </div>:
       <div>
-        {/* Profile Image */}
-        <div className="profile-image">
-          <img src="gfgf" alt="Worker" />
-        </div>
         {/* Worker Details */}
         <div className="profile-details">
           <div className="header">
-            <h2>{user.name}</h2>
+            <h2> {user.name} </h2>
             <button className="edit-btn">Edit</button>
           </div>
              {/* Info */}
           <div className="info-grid">
             <p><strong>Location:</strong> {user.address}</p>
-            <p><strong>Phone:</strong>{user.phone} </p>
+            <p><strong>Phone:</strong> {user.phone} </p>
             <p><strong>Email:</strong> {user.email}</p>
             {/* <p><strong>Status:</strong> {user.available ? "Available" : "Not Available"}</p> */}
           </div>

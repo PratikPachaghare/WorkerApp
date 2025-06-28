@@ -2,8 +2,10 @@ import React, { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import { FaHome, FaClipboardList, FaUserCircle } from 'react-icons/fa';
 import './BottomNav.css'
+import { useSelector } from 'react-redux';
 
-const BottomNav = ({login}) => {
+const BottomNav = () => {
+  const isLogin = useSelector((state)=>state.user.isLoggedIn);
   return (
     <nav className="bottom-nav">
       <NavLink 
@@ -22,7 +24,7 @@ const BottomNav = ({login}) => {
         <span>Request</span>
       </NavLink>
 
-    {!login?
+    {!isLogin?
           <div className="nav-profile">
               <NavLink to="/auth" className="profile-link">
                   <div className='flex'>
