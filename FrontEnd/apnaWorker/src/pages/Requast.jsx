@@ -1,10 +1,14 @@
 // pages/Requast.jsx
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import './Requast.css';
 import RequestForm from '../componets/Requast/RequestForm';
 import { useLocation } from 'react-router-dom';
+import PeddingRequast from '../componets/Requast/PeddingRequast';
+import AcceptedRequeast from '../componets/Requast/AcceptedRequeast';
+import { useSelector } from 'react-redux';
 
 const Requast = () => {
+  const User = useSelector((state)=>state.user.userData);
   const [activeTab, setActiveTab] = useState('request');
   const [requests, setRequests] = useState([
     {
@@ -22,8 +26,32 @@ const Requast = () => {
       message: 'TV not working, need quick repair.',
     },
   ]);
-
   const [accepted, setAccepted] = useState([]);
+
+  const handalRequastData = async ()=>{
+     try {
+        const responce = await fetch("http://localhost:3000/api/requast/getDataByUserId",{
+          method:"Get",
+          body:{userId:User._id}
+        })
+      
+      if(!responce.ok){
+        console.log("ressponse not get :",responce);
+      }  
+
+      console.log("responce : ",responce);
+      setRequests(responce.requests);
+      setAccepted(responce.accepted);
+
+     } catch (error) {
+        console.log("error to fetch requast data",error);
+     }
+  }
+
+  useEffect(()=>{
+    handalRequastData();
+  },[]);
+
 
   const handleAccept = (req) => {
     setAccepted([...accepted, req]);
@@ -54,42 +82,11 @@ const Requast = () => {
 
       <div className="request-content">
         {activeTab === 'request' && (
-          <div className="request-list">
-            {requests.length === 0 ? (
-              <p>No new requests.</p>
-            ) : (
-              requests.map((req) => (
-                <div key={req.id} className="request-card">
-                  <h3>{req.user}</h3>
-                  <p><strong>Location:</strong> {req.location}</p>
-                  <p><strong>Time:</strong> {req.time}</p>
-                  <p><strong>Message:</strong> {req.message}</p>
-                  <div className="card-buttons">
-                    <button className="accept" onClick={() => handleAccept(req)}>Accept</button>
-                    <button className="reject" onClick={() => handleReject(req.id)}>Reject</button>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
+          <PeddingRequast requests={requests} handleAccept={handleAccept} handleReject={handleReject} />
         )}
 
         {activeTab === 'accepted' && (
-          <div className="accepted-list">
-            {accepted.length === 0 ? (
-              <p>No accepted requests yet.</p>
-            ) : (
-              accepted.map((req) => (
-                <div key={req.id} className="request-card accepted">
-                  <h3>{req.user}</h3>
-                  <p><strong>Location:</strong> {req.location}</p>
-                  <p><strong>Time:</strong> {req.time}</p>
-                  <p><strong>Message:</strong> {req.message}</p>
-                  <p className="accepted-label">✔ Accepted</p>
-                </div>
-              ))
-            )}
-          </div>
+          <AcceptedRequeast accepted={accepted} details={"details"}/>
         )}
       </div>
     </div>

@@ -4,13 +4,14 @@ const requestSchema = new mongoose.Schema({
   user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   worker: { type: mongoose.Schema.Types.ObjectId, ref: 'Worker', required: true },
   message: { type: String },
-  requestedTime: { type: Date, required: true }, // Combined date + time
+  requestedTime: { type: String, required: true }, // Combined date + time
+  requestedDate: { type: Date, required: true }, // Combined date + time
   location: {
     type: { type: String, enum: ['Point'], default: 'Point' },
     coordinates: { type: [Number], required: true }
   },
-  address: { type: String }, // human-readable address like "Amravati"
-  image: { type: String },   // image URL if uploaded (optional)
+  address: { type: String }, 
+  image: { type: String },
   status: { 
     type: String, 
     enum: ['pending', 'accepted', 'rejected', 'completed'], 

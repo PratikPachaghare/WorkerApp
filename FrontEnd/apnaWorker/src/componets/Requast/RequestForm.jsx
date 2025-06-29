@@ -3,12 +3,17 @@ import "./RequestForm.css";
 import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import CardShow from "./workerDetailCard";
+import imageCompression from "browser-image-compression";
+import Loader from "../Loder/Loader";
 
 const RequestForm = ({ userId }) => {
+  const [Lodding,setLodding] = useState(false);
+  const [LoddingLoc,setLoddingLoc] = useState(false);
   const location = useLocation();
-  const { worker,data } = location.state || {};
+  const navigator = useNavigate();
+  const { worker, data } = location.state || {};
 
   const [image, setImage] = useState(null);
 
@@ -20,9 +25,10 @@ const RequestForm = ({ userId }) => {
   };
   const [Location, setLocation] = useState("Amravati");
   const [form, setForm] = useState({
-    worker: "",
     message: "",
-    requestedTime: "",
+    date: "",
+    time: "",
+    ProblamImage:"",
     coordinates: [77.7796, 20.9374],
     LocationName: { Location }, // Amravati
   });
@@ -30,6 +36,9 @@ const RequestForm = ({ userId }) => {
   const mapRef = useRef(null);
 
   const handleChange = (e) => {
+    if(e.target.name=="time"){
+      console.log("time :",e.target.value);
+    }
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
@@ -48,31 +57,74 @@ const RequestForm = ({ userId }) => {
     }
   };
 
+    const handleImage = async (e) => {
+      const imageFile = e.target.files[0];
+      if (imageFile) {
+        const options = {
+          maxSizeMB: 0.4,
+          maxWidthOrHeight: 800,
+          useWebWorker: true,
+        };
+        try {
+          const compressedFile = await imageCompression(imageFile, options);
+          setForm({ ...form, ProblamImage: compressedFile });
+          setImage(URL.createObjectURL(compressedFile));
+        } catch (err) {
+          console.error("Compression failed:", err);
+        }
+      }
+    };
+
   const markerIcon = L.icon({
     iconUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png",
     iconSize: [25, 41],
     iconAnchor: [12, 41],
   });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const requestPayload = {
-      // user: userId,
-      user: "bsfe100026584fec",
-      // worker: workers,
-      worker: worker,
-      message: form.message,
-      requestedTime: new Date(form.requestedTime),
-      location: {
-        type: "Point",
-        coordinates: form.coordinates,
-      },
-    };
-    console.log("Submitting request:", requestPayload);
-    // Send to backend...
+    setLodding(true);
+    try {
+      // Combine date and time into a single Date object
+      const formData = new FormData();
+      formData.append("user", data._id);
+      formData.append("worker", worker._id);
+      formData.append("message", form.message);
+      formData.append("requestedTime", form.time);
+      formData.append("requestedDate", form.date);
+      formData.append("longtitude", form.coordinates[1]);
+      formData.append("latitude", form.coordinates[0]);
+      formData.append("address", data.address);
+
+      if(form.ProblamImage){
+        formData.append("ProblamImage",form.ProblamImage);
+      }
+
+      const response = await fetch(
+        "http://localhost:3000/api/requests/create",
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
+
+      const result = await response.json();
+      setLodding(false);
+      if (response.ok) {
+        alert("Request submitted successfully!");
+        navigator("/request");
+      } else {
+        console.error("Failed:", result);
+        alert("Failed to submit request");
+      }
+    } catch (error) {
+      setLodding(false);
+      console.error("❌ Error submitting request:", error);
+    }
   };
 
   const detectMyLocation = () => {
+    setLoddingLoc(true);
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition((position) => {
         const lat = position.coords.latitude;
@@ -88,7 +140,12 @@ const RequestForm = ({ userId }) => {
     } else {
       alert("Geolocation not supported.");
     }
+    setLoddingLoc(false);
   };
+
+    const getPointedLocation = ()=>{
+     getAddressFromCoords(form.coordinates[1],form.coordinates[0]);
+  }
 
   function LocationMarker() {
     useMapEvents({
@@ -109,6 +166,7 @@ const RequestForm = ({ userId }) => {
     <div>
       <CardShow worker={worker} />
       <div className="request-form-container">
+        {Lodding && <Loader/>}
         <form className="request-form" onSubmit={handleSubmit}>
           <h2>Request a Service</h2>
           <div className="main-container-deckstop">
@@ -174,6 +232,7 @@ const RequestForm = ({ userId }) => {
                 required
               />
             </div>
+
             {/* for deckstop container */}
             <div className="Right">
               {/* Map for Location */}
@@ -202,13 +261,22 @@ const RequestForm = ({ userId }) => {
                   required
                 />
 
-                <button
-                  type="button"
-                  className="detect-btn block"
-                  onClick={detectMyLocation}
-                >
-                  Detect My Location
-                </button>
+                <div className="flex gap-1">
+                  <button
+                    type="button"
+                    className="detect-btn"
+                    onClick={getPointedLocation}
+                  >
+                    get pointend location
+                  </button>
+                  <button
+                    type="button"
+                    className="detect-btn"
+                    onClick={detectMyLocation}
+                  >
+                    {LoddingLoc? "Lodding...":"Detect My Location"}
+                  </button>
+                </div>
 
                 <label htmlFor="imageUpload">
                   Upload problam image *Not required
@@ -218,7 +286,7 @@ const RequestForm = ({ userId }) => {
                   id="imageUpload"
                   name="img"
                   accept="image/*"
-                  onChange={handleImageChange}
+                  onChange={handleImage}
                   required
                 />
 
