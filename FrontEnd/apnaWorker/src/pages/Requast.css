@@ -77,6 +77,12 @@
   margin-top: 10px;
 }
 
+.request-card img {
+  width: 100%;
+  max-width: 300px;
+  border-radius: 5px;
+}
+
 @media (max-width: 600px) {
   .request-card {
     padding: 10px;

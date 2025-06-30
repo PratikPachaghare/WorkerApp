@@ -1,6 +1,7 @@
 import {Request} from "../models/requst.model.js";
 import { uploadOnCloudinery } from "../utils/cloudnary.js";
 import fs from "fs";
+import mongoose from "mongoose";
 
 export const createRequest = async (req, res) => {
   try {
@@ -78,16 +79,50 @@ export const getRequestsByUser = async (req, res) => {
   }
 };
 
-// GET /api/requests/worker
 export const getRequastDataByWorkerId = async (req, res) => {
   try {
-    const workerId = req.userId;
+    const { workerId } = req.body;
 
-    const requests = await Request.find({ worker: workerId })
-      .populate("user", "-password") // get user details
+    if (!workerId) {
+      return res.status(400).json({ message: "workerId is required" });
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(workerId)) {
+      return res.status(400).json({ message: "Invalid workerId" });
+    }
+
+    const objectWorkerId = new mongoose.Types.ObjectId(workerId);
+
+    // Fetch all requests for this worker
+    const requests = await Request.find({ worker: objectWorkerId })
+      .populate("user", "-password")
       .sort({ createdAt: -1 });
-    res.status(200).json({ requests });
+
+    // Separate requests by status
+    const pendingRequests = requests.filter(req => req.status === "pending");
+    const acceptedRequests = requests.filter(req => req.status === "accepted");
+
+    res.status(200).json({
+      pending: pendingRequests,
+      accepted: acceptedRequests,
+    });
   } catch (err) {
-    res.status(500).json({ message: "Failed to fetch worker requests", error: err });
+    console.error("error in get request data:", err);
+    res.status(500).json({
+      message: "Failed to fetch worker requests",
+      error: err.message,
+    });
   }
 };
+
+export const acceptRequast = async (req, res) => {
+  const { id } = req.params;
+  await Request.findByIdAndUpdate(id, { status: 'accepted' });
+  res.send({ message: 'Request accepted' });
+}
+
+export const rejectRequast = async (req, res) => {
+  const { id } = req.params;
+  await Request.findByIdAndUpdate(id, { status: 'rejected' });
+  res.send({ message: 'Request rejected' });
+}

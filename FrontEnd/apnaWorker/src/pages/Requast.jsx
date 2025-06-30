@@ -1,96 +1,138 @@
 // pages/Requast.jsx
 import React, { useEffect, useState } from 'react';
 import './Requast.css';
-import RequestForm from '../componets/Requast/RequestForm';
-import { useLocation } from 'react-router-dom';
 import PeddingRequast from '../componets/Requast/PeddingRequast';
 import AcceptedRequeast from '../componets/Requast/AcceptedRequeast';
 import { useSelector } from 'react-redux';
 
 const Requast = () => {
-  const User = useSelector((state)=>state.user.userData);
+  const User = useSelector((state) => state.user.userData);
+  console.log("User : ",User);
   const [activeTab, setActiveTab] = useState('request');
-  const [requests, setRequests] = useState([
-    {
-      id: 1,
-      user: 'Amit Kumar',
-      location: 'Delhi',
-      time: 'Tomorrow 10 AM',
-      message: 'Need a plumber for kitchen sink.',
-    },
-    {
-      id: 2,
-      user: 'Priya Sharma',
-      location: 'Mumbai',
-      time: 'Today 5 PM',
-      message: 'TV not working, need quick repair.',
-    },
-  ]);
+  const [pending, setPending] = useState([]);
   const [accepted, setAccepted] = useState([]);
+  const workerLng = User.location.coordinates[0];
+  const workerLat = User.location.coordinates[1];
+  const workerPosition = [workerLat, workerLng];
 
-  const handalRequastData = async ()=>{
-     try {
-        const responce = await fetch("http://localhost:3000/api/requast/getDataByUserId",{
-          method:"Get",
-          body:{userId:User._id}
-        })
-      
-      if(!responce.ok){
-        console.log("ressponse not get :",responce);
-      }  
+  const handalRequastData = async () => {
+    try {
+      const response = await fetch(
+        'http://localhost:3000/api/requests/getRequastDataByWorkerId',
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ workerId: User._id }),
+        }
+      );
 
-      console.log("responce : ",responce);
-      setRequests(responce.requests);
-      setAccepted(responce.accepted);
+      if (!response.ok) {
+        console.log('Response not OK:', response);
+        return;
+      }
 
-     } catch (error) {
-        console.log("error to fetch requast data",error);
-     }
-  }
+      const data = await response.json();
+      console.log('Response data:', data);
 
-  useEffect(()=>{
-    handalRequastData();
-  },[]);
-
-
-  const handleAccept = (req) => {
-    setAccepted([...accepted, req]);
-    setRequests(requests.filter((r) => r.id !== req.id));
+      setPending(data.pending || []);
+      setAccepted(data.accepted || []);
+    } catch (error) {
+      console.log('Error fetching request data:', error);
+    }
   };
 
-  const handleReject = (id) => {
-    setRequests(requests.filter((r) => r.id !== id));
+  useEffect(() => {
+    handalRequastData();
+  }, []);
+
+  /**
+   * Accept request:
+   * - Send API to update request status
+   * - Move request from pending → accepted
+   */
+  const handleAccept = async (req) => {
+    try {
+      const response = await fetch(
+        `http://localhost:3000/api/requests/accept/${req._id}`,
+        {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+        }
+      );
+
+      if (!response.ok) {
+        console.error('Failed to accept request');
+        return;
+      }
+
+      // Update frontend state
+      setAccepted([...accepted, { ...req, status: 'accepted' }]);
+      setPending(pending.filter((r) => r._id !== req._id));
+    } catch (error) {
+      console.error('Error accepting request:', error);
+    }
+  };
+
+  /**
+   * Reject request:
+   * - Optionally send API to update status
+   * - Remove request from pending
+   */
+  const handleReject = async (id) => {
+    try {
+      const response = await fetch(
+        `http://localhost:3000/api/requests/reject/${id}`,
+        {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+        }
+      );
+
+      if (!response.ok) {
+        console.error('Failed to reject request');
+        return;
+      }
+
+      // Remove from pending list
+      setPending(pending.filter((r) => r._id !== id));
+    } catch (error) {
+      console.error('Error rejecting request:', error);
+    }
   };
 
   return (
     <div>
-    <div className="request-container">
-      <div className="request-tabs">
-        <button
-          className={activeTab === 'request' ? 'tab active' : 'tab'}
-          onClick={() => setActiveTab('request')}
-        >
-          Request
-        </button>
-        <button
-          className={activeTab === 'accepted' ? 'tab active' : 'tab'}
-          onClick={() => setActiveTab('accepted')}
-        >
-          Accepted
-        </button>
-      </div>
+      <div className="request-container">
+        <div className="request-tabs">
+          <button
+            className={activeTab === 'request' ? 'tab active' : 'tab'}
+            onClick={() => setActiveTab('request')}
+          >
+            Request
+          </button>
+          <button
+            className={activeTab === 'accepted' ? 'tab active' : 'tab'}
+            onClick={() => setActiveTab('accepted')}
+          >
+            Accepted
+          </button>
+        </div>
 
-      <div className="request-content">
-        {activeTab === 'request' && (
-          <PeddingRequast requests={requests} handleAccept={handleAccept} handleReject={handleReject} />
-        )}
+        <div className="request-content">
+          {activeTab === 'request' && (
+            <PeddingRequast
+              pending={pending}
+              handleAccept={handleAccept}
+              handleReject={handleReject}
+            />
+          )}
 
-        {activeTab === 'accepted' && (
-          <AcceptedRequeast accepted={accepted} details={"details"}/>
-        )}
+          {activeTab === 'accepted' && (
+            <AcceptedRequeast accepted={accepted} workerLocation={workerPosition}/>
+          )}
+        </div>
       </div>
     </div>
-  </div>  
   );
 };
 

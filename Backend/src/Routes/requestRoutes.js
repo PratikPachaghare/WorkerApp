@@ -1,11 +1,14 @@
 import express from 'express'
-import { createRequest, getRequastDataByWorkerId, updateRequestStatus } from "../controllers/request.js";
+import { acceptRequast, createRequest, getRequastDataByWorkerId, rejectRequast, updateRequestStatus } from "../controllers/request.js";
 import { upload } from '../middleware/multer.js';
 
 const router = express.Router();
 
 router.post("/create",upload.single("ProblamImage"),createRequest);
 router.patch("/status/:id",updateRequestStatus);
-router.get("getRequastDataByWorkerId",getRequastDataByWorkerId);
+router.post("/getRequastDataByWorkerId",getRequastDataByWorkerId);
+router.patch('/accept/:id', acceptRequast );
+router.patch('/reject/:id', rejectRequast);
+
 
 export default router;
