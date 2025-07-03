@@ -7,7 +7,7 @@ import { NavLink } from "react-router-dom";
 import InfiniteScroll from "react-infinite-scroll-component";
 import axios from "axios";
 import { useSelector } from "react-redux";
-import Loader from "../componets/Loder/Loader";
+import Loader, { Loader2 } from "../componets/Loder/Loader";
 
 const LIMIT = 20;
 
@@ -99,7 +99,7 @@ const Home = () => {
           dataLength={workersData.length} // full list, not filtered
           next={() => fetchWorkers(pageRef.current)}
           hasMore={hasMore}
-          loader={<h1 className="m-auto mt-2 text-2xl">Lodding....</h1>}
+          loader={<h1 className="m-auto mt-2 text-2xl "><Loader2/></h1>}
           endMessage={
             <p className="text-center py-2 text-gray-500">
               🎉 No more workers nearby.

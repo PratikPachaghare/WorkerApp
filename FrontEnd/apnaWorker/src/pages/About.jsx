@@ -1,7 +1,7 @@
 // pages/About.jsx
 import React from 'react';
 import './About.css';
-
+// about this page
 const About = () => {
   return (
     <div className="about-container">

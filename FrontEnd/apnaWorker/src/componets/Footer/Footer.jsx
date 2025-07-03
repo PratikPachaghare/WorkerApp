@@ -5,7 +5,7 @@ import { FaFacebook, FaInstagram, FaTwitter } from 'react-icons/fa';
 
 const Footer = () => {
   return (
-    <footer className="footer">
+    <footer className="footer z-11">
       <div className="footer-container">
 
         {/* Section 1: Logo + Tagline */}

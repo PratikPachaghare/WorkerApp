@@ -9,4 +9,12 @@ const Loader = () => {
   );
 };
 
+export const Loader2 = () => {
+  return (
+    <div className="premium-loader-overlay2">
+      <div className="dual-ring-spinner2"></div>
+    </div>
+  );
+};
+
 export default Loader;

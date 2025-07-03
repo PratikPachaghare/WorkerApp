@@ -8,7 +8,7 @@ import { logout } from '../../redux/userSlice';
 
 export const WorkerProfile = () => {
   const user = useSelector((state)=>state.user.userData);
-  const isWorker = useSelector((state)=> state.user.isWorkers);
+  const isWorker = useSelector((state)=> state.user.isWorker);
   console.log("navbar isWorker", isWorker);
   const dispatch = useDispatch();
   const navigator = useNavigate();
