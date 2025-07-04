@@ -9,7 +9,7 @@ import { logout } from '../../redux/userSlice';
 export const WorkerProfile = () => {
   const user = useSelector((state)=>state.user.userData);
   const isWorker = useSelector((state)=> state.user.isWorker);
-  console.log("navbar isWorker", isWorker);
+  console.log("profile isWorker", isWorker);
   const dispatch = useDispatch();
   const navigator = useNavigate();
   const handleLogout = ()=>{
@@ -23,7 +23,7 @@ export const WorkerProfile = () => {
 
   return (
     <div className="profile-container">
-      {isWorker?<div className="profile-card">
+      {isWorker == true ?<div className="profile-card">
         
         {/* Profile Image */}
         <div className="profile-image">

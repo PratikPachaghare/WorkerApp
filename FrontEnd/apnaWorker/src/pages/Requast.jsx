@@ -4,21 +4,25 @@ import './Requast.css';
 import PeddingRequast from '../componets/Requast/PeddingRequast';
 import AcceptedRequeast from '../componets/Requast/AcceptedRequeast';
 import { useSelector } from 'react-redux';
+import { Loader2 } from '../componets/Loder/Loader';
 
 const Requast = () => {
+  const [Lodding,setLodding] = useState(false);
   const User = useSelector((state) => state.user.userData);
-  console.log("User : ",User);
+  const isWorker = useSelector((state)=> state.user.isWorker);
   const [activeTab, setActiveTab] = useState('request');
   const [pending, setPending] = useState([]);
   const [accepted, setAccepted] = useState([]);
-  const workerLng = User.location.coordinates[0];
-  const workerLat = User.location.coordinates[1];
+  const [workerLng,setWorkerLng] = useState(0);
+  const [workerLat,setWorkerLat] = useState(0);
   const workerPosition = [workerLat, workerLng];
 
   const handalRequastData = async () => {
+    setLodding(true);
     try {
+      const api = isWorker==true?'http://localhost:3000/api/requests/getRequastDataByWorkerId':'http://localhost:3000/api/requests/getRequastDataByUserId';
       const response = await fetch(
-        'http://localhost:3000/api/requests/getRequastDataByWorkerId',
+        api,
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -32,24 +36,26 @@ const Requast = () => {
       }
 
       const data = await response.json();
-      console.log('Response data:', data);
+      console.log('Response data in requast page:', data);
 
       setPending(data.pending || []);
       setAccepted(data.accepted || []);
     } catch (error) {
       console.log('Error fetching request data:', error);
     }
+    setLodding(false);
   };
 
   useEffect(() => {
-    handalRequastData();
+    
+    setTimeout(()=>{
+      setWorkerLng(User.location.coordinates[0])
+      setWorkerLat(User.location.coordinates[1])
+      handalRequastData();
+    },50)
+    
   }, []);
 
-  /**
-   * Accept request:
-   * - Send API to update request status
-   * - Move request from pending → accepted
-   */
   const handleAccept = async (req) => {
     try {
       const response = await fetch(
@@ -73,11 +79,6 @@ const Requast = () => {
     }
   };
 
-  /**
-   * Reject request:
-   * - Optionally send API to update status
-   * - Remove request from pending
-   */
   const handleReject = async (id) => {
     try {
       const response = await fetch(
@@ -103,12 +104,13 @@ const Requast = () => {
   return (
     <div>
       <div className="request-container">
+         {Lodding && <Loader2/>}
         <div className="request-tabs">
           <button
             className={activeTab === 'request' ? 'tab active' : 'tab'}
             onClick={() => setActiveTab('request')}
           >
-            Request
+            {isWorker==true?"Request":"Send"}
           </button>
           <button
             className={activeTab === 'accepted' ? 'tab active' : 'tab'}
@@ -119,6 +121,7 @@ const Requast = () => {
         </div>
 
         <div className="request-content">
+         
           {activeTab === 'request' && (
             <PeddingRequast
               pending={pending}

@@ -115,6 +115,39 @@ export const getRequastDataByWorkerId = async (req, res) => {
   }
 };
 
+export const getRequastDataByUserId = async (req, res) => {
+  try {
+    const { workerId } = req.body;
+    const userId = workerId;
+    if (!userId) {
+      return res.status(400).json({ message: "UserId is required" });
+    }
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      return res.status(400).json({ message: "Invalid UserId" });
+    }
+    const objectUserId = new mongoose.Types.ObjectId(userId);
+    // Fetch all requests for this worker
+    const requests = await Request.find({ user: objectUserId })
+      .populate("worker user", "-password")
+      .sort({ createdAt: -1 });
+
+    // Separate requests by status
+    const pendingRequests = requests.filter(req => req.status === "pending");
+    const acceptedRequests = requests.filter(req => req.status === "accepted");
+
+    res.status(200).json({
+      pending: pendingRequests,
+      accepted: acceptedRequests,
+    });
+  } catch (err) {
+    console.error("error in get request data:", err);
+    res.status(500).json({
+      message: "Failed to fetch worker requests",
+      error: err.message,
+    });
+  }
+};
+
 export const acceptRequast = async (req, res) => {
   const { id } = req.params;
   await Request.findByIdAndUpdate(id, { status: 'accepted' });
