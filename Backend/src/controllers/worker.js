@@ -172,6 +172,102 @@ export const getNearbyWorkers = async (req, res) => {
   }
 };
 
+export const getNearbyWorkersCategories = async (req, res) => {
+  const { longitude, latitude, limit = 20,categories} = req.query;
+  console.log(longitude, latitude, limit);
+  if (!longitude || !latitude) {
+    console.log("location required");
+    return res
+      .status(400)
+      .json({ message: "Longitude and latitude are required" });
+  }
+  try {
+    const nearbyWorkers = await Worker.aggregate([
+      {
+        $geoNear: {
+          near: {
+            type: "Point",
+            coordinates: [parseFloat(longitude), parseFloat(latitude)],
+          },
+          distanceField: "distance",
+          spherical: true,
+        },
+      },
+      { $sort: { distance: 1 } },
+      { $limit: parseInt(limit) },
+    ]);
+
+    if(categories=='All'){res.status(200).json({ workers: nearbyWorkers });}
+    else{
+    const fillterData = nearbyWorkers.filter((data)=>data.categories==categories);
+    res.status(200).json({ workers: fillterData });
+    }
+  } catch (error) {
+    console.error("Geo fetch failed:", error);
+    res.status(500).json({ message: "Failed to fetch nearby workers", error });
+  }
+};
+export const getNearbyWorkersSerach = async (req, res) => {
+  const { longitude, latitude, limit = 20, search = "", category = "All" } = req.query;
+
+  if (!longitude || !latitude) {
+    return res
+      .status(400)
+      .json({ message: "Longitude and latitude are required" });
+  }
+
+  try {
+    const nearbyWorkers = await Worker.aggregate([
+      {
+        $geoNear: {
+          near: {
+            type: "Point",
+            coordinates: [parseFloat(longitude), parseFloat(latitude)],
+          },
+          distanceField: "distance",
+          spherical: true,
+        },
+      },
+      { $sort: { distance: 1 } },
+      { $limit: parseInt(limit) },
+    ]);
+
+    let filteredWorkers = nearbyWorkers;
+
+    // FILTER BY CATEGORY
+    if (category !== "All") {
+      filteredWorkers = filteredWorkers.filter((worker) =>
+        worker.categories.some(
+          (cat) => cat.toLowerCase() === category.toLowerCase()
+        )
+      );
+    }
+
+    // FILTER BY SEARCH VALUE
+    if (search.trim() !== "") {
+      const regex = new RegExp(search.trim(), "i"); // case-insensitive
+
+      filteredWorkers = filteredWorkers.filter((worker) => {
+        return (
+          regex.test(worker.name || "") ||
+          (worker.categories || []).some((cat) => regex.test(cat)) ||
+          (worker.subcategories || []).some((subcat) => regex.test(subcat)) ||
+          regex.test(worker.description || "") ||
+          regex.test(worker.address || "")
+        );
+      });
+    }
+
+    res.status(200).json({ workers: filteredWorkers });
+  } catch (error) {
+    console.error("Geo fetch failed:", error);
+    res
+      .status(500)
+      .json({ message: "Failed to fetch nearby workers", error });
+  }
+};
+
+
 export const getCurrentUser = async (req, res) => {
   try {
     const user = await Worker.findById(req.userId).select("-password"); // hide password

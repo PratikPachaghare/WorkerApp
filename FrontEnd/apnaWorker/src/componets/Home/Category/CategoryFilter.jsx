@@ -1,37 +1,48 @@
 import React, { useRef } from 'react';
 import './CategoryFilter.css';
 
-const categories = ['All', 'Electrician', 'Plumber', 'Carpenter', 'Painter', 'Driver', 'Cook', 'Cleaner', 'AC Mechanic'];
+const categories = [
+  'All', 'Electrician', 'Plumber', 'Carpenter', 'Painter',
+  'Driver', 'Cook', 'Cleaner', 'AC Mechanic'
+];
 
 const CategoryFilter = ({ selectedCategory, setSelectedCategory }) => {
-  const scrollRef = useRef(null);
+  const scrollContainerRef = useRef(null);
 
-  const scroll = (direction) => {
-    const scrollAmount = 100;
-    if (direction === 'left') {
-      scrollRef.current.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
-    } else {
-      scrollRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
-    }
+  const scroll = (scrollOffset) => {
+    scrollContainerRef.current.scrollBy({
+      left: scrollOffset,
+      behavior: 'smooth',
+    });
   };
 
   return (
-    <div className="category-wrapper">
-      <button className="scroll-btn left" onClick={() => scroll('left')}>&lt;</button>
-      
-      <div className="category-scroll w-full" ref={scrollRef}>
-        {categories.map(cat => (
+    <div className="category-filter-wrapper">
+      <button
+        className="scroll-button"
+        onClick={() => scroll(-150)}
+      >
+        &lt;
+      </button>
+
+      <div className="category-scroll" ref={scrollContainerRef}>
+        {categories.map((category) => (
           <button
-            key={cat}
-            onClick={() => setSelectedCategory(cat)}
-            className={`category-btn ${selectedCategory === cat ? 'active' : ''}`}
+            key={category}
+            className={`category-btn ${selectedCategory === category ? 'active' : ''}`}
+            onClick={() => setSelectedCategory(category)}
           >
-            {cat}
+            {category}
           </button>
         ))}
       </div>
-      
-      <button className="scroll-btn right" onClick={() => scroll('right')}>&gt;</button>
+
+      <button
+        className="scroll-button"
+        onClick={() => scroll(150)}
+      >
+        &gt;
+      </button>
     </div>
   );
 };

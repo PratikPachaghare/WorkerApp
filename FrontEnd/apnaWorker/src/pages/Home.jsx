@@ -15,14 +15,40 @@ const Home = () => {
   const [workersData, setWorkersData] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [hasMore, setHasMore] = useState(true);
-  const pageRef = useRef(1); // for pagination tracking
+  const pageRef = useRef(1);
 
   const data = useSelector((state) => state.user.userData);
-
-  const filteredWorkers =
-    selectedCategory === "All"
-      ? workersData
-      : workersData.filter((w) => w.category === selectedCategory);
+  
+  const categoryWorkers = async () => {
+    const longitude = data?.location?.coordinates?.[0];
+    const latitude = data?.location?.coordinates?.[1];
+    
+    if (!longitude || !latitude) {
+      console.warn("🚫 Skipping fetch, missing coordinates");
+      return;
+    }
+    
+    try {
+      const res = await axios.get("http://localhost:3000/api/workers/nearby/categories", {
+        params: {
+          longitude,
+          latitude,
+          limit: 40,
+          categories:selectedCategory,
+        },
+      });
+      
+      const newWorkers = res.data.workers;
+      setWorkersData(newWorkers);
+    } catch (err) {
+      console.error("❌ Failed to load workers:", err);
+      setHasMore(false);
+    }
+  };    
+  
+  useEffect(()=>{
+    categoryWorkers();
+  },[selectedCategory]);
 
   // Load first page only after coordinates are ready
   useEffect(() => {
@@ -107,7 +133,7 @@ const Home = () => {
           }
         >
           <div className="worker-list">
-            {filteredWorkers.map((worker) => (
+            {workersData.map((worker) => (
               <NavLink
                 key={worker._id}
                 to="/sendRequest"
