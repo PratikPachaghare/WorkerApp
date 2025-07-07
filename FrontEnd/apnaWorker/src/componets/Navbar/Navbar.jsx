@@ -8,7 +8,6 @@ import { useSelector } from 'react-redux';
 
 const Navbar = () => {
   const user = useSelector((state)=> state.user.userData);
-  console.log("user in the Navbar : ",user);
   const login = useSelector((state)=> state.user.isLoggedIn);
   return (
     <nav className="navbar">

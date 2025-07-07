@@ -21,15 +21,7 @@ export const registerWorker = async (req, res) => {
       experience,
       description,
     } = req.body;
-    // console.log(name);
-    // console.log(email);
-    // console.log(password);
-    // console.log(gender);
-    // console.log(longitude);
-    // console.log(latitude);
-    // console.log(categories);
-    // console.log(experience);
-    // console.log(description);
+
     const existingWorker = await Worker.findOne({ email });
     if (existingWorker)
       return res.status(400).json({ message: "Worker already exists" });
@@ -64,7 +56,6 @@ export const registerWorker = async (req, res) => {
     });
 
     await newWorker.save();
-    console.log("worker is register : ", newWorker);
     res.status(201).json({
       newWorker,
       message: "Worker registered successfully",
@@ -126,20 +117,9 @@ export const getWorkerById = async (req, res) => {
   }
 };
 
-export const getAll = async (req, res) => {
-  try {
-    const Allworker = await Worker.find();
-    if (!Allworker)
-      return res.status(404).json({ message: "Worker data not found" });
-    res.status(200).json({ Allworker });
-  } catch (err) {
-    res.status(500).json({ message: "error in getAll worker ", err });
-  }
-};
 
 export const getNearbyWorkers = async (req, res) => {
   const { longitude, latitude, page = 1, limit = 20 } = req.query;
-  console.log(longitude, latitude, page, limit);
   if (!longitude || !latitude) {
     console.log("location required");
     return res
@@ -174,7 +154,6 @@ export const getNearbyWorkers = async (req, res) => {
 
 export const getNearbyWorkersCategories = async (req, res) => {
   const { longitude, latitude, limit = 20,categories} = req.query;
-  console.log(longitude, latitude, limit);
   if (!longitude || !latitude) {
     console.log("location required");
     return res
@@ -207,6 +186,7 @@ export const getNearbyWorkersCategories = async (req, res) => {
     res.status(500).json({ message: "Failed to fetch nearby workers", error });
   }
 };
+
 export const getNearbyWorkersSerach = async (req, res) => {
   const { longitude, latitude, limit = 20, search = "", category = "All" } = req.query;
 
@@ -234,7 +214,7 @@ export const getNearbyWorkersSerach = async (req, res) => {
 
     let filteredWorkers = nearbyWorkers;
 
-    // FILTER BY CATEGORY
+
     if (category !== "All") {
       filteredWorkers = filteredWorkers.filter((worker) =>
         worker.categories.some(
@@ -243,9 +223,8 @@ export const getNearbyWorkersSerach = async (req, res) => {
       );
     }
 
-    // FILTER BY SEARCH VALUE
     if (search.trim() !== "") {
-      const regex = new RegExp(search.trim(), "i"); // case-insensitive
+      const regex = new RegExp(search.trim(), "i"); 
 
       filteredWorkers = filteredWorkers.filter((worker) => {
         return (
@@ -284,27 +263,82 @@ export const getCurrentUser = async (req, res) => {
 };
 
 export const SearchWorker = async (req, res) => {
-  const { keyword } = req.query;
+  const { keyword, latitude, longitude } = req.query;
 
-  if (!keyword) return res.status(400).json({ message: "No keyword provided" });
+  if (!keyword) {
+    return res.status(400).json({ message: "No keyword provided" });
+  }
+
+  if (!latitude || !longitude) {
+    return res.status(400).json({ message: "Latitude and longitude are required" });
+  }
 
   try {
-    const regex = new RegExp(keyword, "i"); // Case-insensitive match
+    const words = keyword.trim().split(/\s+/);
 
-    const results = await Worker.find({
-      $or: [
-        { name: { $regex: regex } },
-        { category: { $regex: regex } },
-        { description: { $regex: regex } },
-        { address: { $regex: regex } },
-      ],
-    }).limit(20);
+    const orClauses = [];
 
-    res.json(results);
+    for (const word of words) {
+      const regex = new RegExp(word, "i");
+
+      orClauses.push({ name: { $regex: regex } });
+      orClauses.push({ categories: { $regex: regex } });
+      orClauses.push({ description: { $regex: regex } });
+      orClauses.push({ address: { $regex: regex } });
+      orClauses.push({ subcategories: { $regex: regex } });
+    }
+
+    const matchedWorkers = await Worker.aggregate([
+      {
+        $geoNear: {
+          near: {
+            type: "Point",
+            coordinates: [parseFloat(longitude), parseFloat(latitude)],
+          },
+          distanceField: "distance",
+          spherical: true,
+          query: {
+            $or: orClauses,
+          },
+        },
+      },
+      { $limit: 40 },
+    ]);
+
+    if (matchedWorkers.length > 0) {
+      return res.json({ workers: matchedWorkers });
+    }
+
+    // Step 2 — Similar workers fallback
+    const similarWorkers = await Worker.aggregate([
+      {
+        $geoNear: {
+          near: {
+            type: "Point",
+            coordinates: [parseFloat(longitude), parseFloat(latitude)],
+          },
+          distanceField: "distance",
+          spherical: true,
+          query: {
+            categories: { $regex: new RegExp(keyword, "i") },
+          },
+        },
+      },
+      { $limit: 20 },
+    ]);
+
+    return res.json({
+      message: "No exact matches found, showing similar workers",
+      workers: similarWorkers,
+    });
+
   } catch (err) {
+    console.error("SearchWorker Error:", err);
     res.status(500).json({ error: "Server error" });
   }
 };
+
+
 
 export const getSuggestions = async (req, res) => {
   try {
@@ -319,7 +353,7 @@ export const getSuggestions = async (req, res) => {
     const workers = await Worker.find({
       $or: [
         { name: { $regex: regex } },
-        { category: { $regex: regex } },
+        { categories: { $regex: regex } },
         { description: { $regex: regex } },
         { address: { $regex: regex } },
       ],
@@ -331,10 +365,12 @@ export const getSuggestions = async (req, res) => {
     workers.forEach((worker) => {
       if (worker.name && regex.test(worker.name))
         suggestionSet.add(worker.name);
-      if (worker.category && regex.test(worker.category))
-        suggestionSet.add(worker.category);
+      if (worker.categories && regex.test(worker.categories))
+        suggestionSet.add(worker.categories);
       if (worker.address && regex.test(worker.address))
         suggestionSet.add(worker.address);
+      if (worker.subcategories && regex.test(worker.subcategories))
+        suggestionSet.add(worker.subcategories);
       if (worker.description && regex.test(worker.description)) {
         const words = worker.description.split(" ");
         words.forEach((word) => {

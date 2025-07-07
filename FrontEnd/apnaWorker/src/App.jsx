@@ -24,8 +24,6 @@ function App() {
   useEffect(() => {
     const storedToken = localStorage.getItem("workerToken") || localStorage.getItem("UserToken");
     const isWorker = localStorage.getItem("isWorker");
-    console.log("iswokrer:", isWorker);
-
     if (storedToken) {
       setIsLoggedIn(true);
       dispatch(isWorkers(isWorker));

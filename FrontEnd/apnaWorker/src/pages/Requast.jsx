@@ -36,7 +36,6 @@ const Requast = () => {
       }
 
       const data = await response.json();
-      console.log('Response data in requast page:', data);
 
       setPending(data.pending || []);
       setAccepted(data.accepted || []);

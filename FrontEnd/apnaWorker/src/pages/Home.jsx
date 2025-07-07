@@ -24,7 +24,6 @@ const Home = () => {
     const latitude = data?.location?.coordinates?.[1];
     
     if (!longitude || !latitude) {
-      console.warn("🚫 Skipping fetch, missing coordinates");
       return;
     }
     
@@ -44,7 +43,32 @@ const Home = () => {
       console.error("❌ Failed to load workers:", err);
       setHasMore(false);
     }
-  };    
+  }; 
+  const SerachWorkers = async (keyword) => {
+    const longitude = data?.location?.coordinates?.[0];
+    const latitude = data?.location?.coordinates?.[1];
+    
+    if (!longitude || !latitude) {
+      return;
+    }
+    
+    try {
+      const res = await axios.get("http://localhost:3000/api/workers/searchWorker", {
+        params: {
+          longitude,
+          latitude,
+          limit: 40,
+          keyword:keyword,
+        },
+      });
+      
+      const newWorkers = res.data.workers;
+      setWorkersData(newWorkers);
+    } catch (err) {
+      console.error("❌ Failed to load workers:", err);
+      setHasMore(false);
+    }
+  }; 
   
   useEffect(()=>{
     categoryWorkers();
@@ -59,13 +83,11 @@ const Home = () => {
       typeof coords[0] === "number" &&
       typeof coords[1] === "number"
     ) {
-      console.log("✅ Coordinates available:", coords);
       setWorkersData([]);
       setHasMore(true);
       pageRef.current = 1;
       fetchWorkers(1);
     } else {
-      console.warn("🚫 Missing or invalid coordinates:", coords);
     }
   }, [data]);
 
@@ -74,7 +96,7 @@ const Home = () => {
     const latitude = data?.location?.coordinates?.[1];
 
     if (!longitude || !latitude) {
-      console.warn("🚫 Skipping fetch, missing coordinates");
+      console.log("Skipping fetch, missing coordinates");
       return;
     }
 
@@ -111,7 +133,10 @@ const Home = () => {
   return (
     <div className="home-container">
       <div className="Seach-Category">
-        <SearchBar />
+        <SearchBar
+        SerachWorkers={SerachWorkers}
+        fetchWorkers={fetchWorkers}
+        />
         <div className="category-filter">
           <CategoryFilter
             selectedCategory={selectedCategory}
