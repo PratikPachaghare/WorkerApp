@@ -20,7 +20,6 @@ const SearchBar = ({ SerachWorkers ,fetchWorkers}) => {
       if (Array.isArray(suggetions[0])) {
         suggetions = suggetions[0];
       }
-
       setSuggestions(suggetions);
       setShowSuggestions(true);
     } catch (err) {

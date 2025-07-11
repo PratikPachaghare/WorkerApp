@@ -10,8 +10,12 @@ import {
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { OpenStreetMapProvider } from 'leaflet-geosearch';
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 const UserRegister = () => {
+  const navigator = useNavigate();
+  const [Loding,setLoding] = useState(false);
   const [Address,setAddress] = useState('Amravati');
   const [form, setForm] = useState({
     name: '',
@@ -105,11 +109,33 @@ const UserRegister = () => {
     }
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log('Registering user:', form);
-    // send data to backend...
+  const handleSubmit = async (e) => {
+  e.preventDefault();
+
+  const payload = {
+    name: form.name,
+    email: form.email,
+    password: form.password,
+    phone: form.phone,
+    address: Address,
+    longitude: form.coordinates[0],
+    latitude: form.coordinates[1],
   };
+
+  try {
+    const response = await axios.post(
+      "http://localhost:3000/api/users/register",
+      payload
+    );
+    alert("User registered successfully");
+    console.log(response.data);
+    navigator("/");
+  } catch (err) {
+    console.error("Registration failed:", err);
+  }
+  setLoding(false);
+};
+
 
   return (
     <div className="register-container">

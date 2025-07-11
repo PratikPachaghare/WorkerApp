@@ -20,10 +20,12 @@ function App() {
   const [user, setUser] = useState({});
   const [isLoggedIn, setIsLoggedIn] = useState(false); // ✅ Renamed from `login` (confusing)
   const [loading, setLoading] = useState(true); // ✅ Typo fixed
+  const [isWorker,setIsWorker] = useState(false);
 
   useEffect(() => {
     const storedToken = localStorage.getItem("workerToken") || localStorage.getItem("UserToken");
     const isWorker = localStorage.getItem("isWorker");
+    console.log(isWorker);
     if (storedToken) {
       setIsLoggedIn(true);
       dispatch(isWorkers(isWorker));
@@ -74,7 +76,7 @@ function App() {
         </Routes>
       ) : (
         <Routes>
-          <Route path="/" element={<Home />} />
+          <Route path="/" element={<Home isWorker={isWorker}/>} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/request" element={<Request />} />
           <Route path="/about" element={<About />} />

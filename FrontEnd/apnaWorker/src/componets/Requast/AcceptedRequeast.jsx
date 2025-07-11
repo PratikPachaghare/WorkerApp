@@ -45,7 +45,8 @@ function openGoogleMapsDirection(workerLat, workerLng, userLat, userLng) {
 }
 
 export default function AcceptedRequeast({ accepted, workerLocation }) {
-  const isWorker = useSelector((state)=>state.user.isWorker);
+  const isWorker = useSelector((state)=>state.user.isWorker)=='true';
+  
   return (
     <div className="accepted-list">
       {isWorker==true?
@@ -55,6 +56,7 @@ export default function AcceptedRequeast({ accepted, workerLocation }) {
         <p>No accepted requests yet.</p>
       ) : (
         accepted.map((req) => {
+
           // Note: GeoJSON is [longitude, latitude]
           const userLng = req.location.coordinates[1];
           const userLat = req.location.coordinates[0];
@@ -68,7 +70,7 @@ export default function AcceptedRequeast({ accepted, workerLocation }) {
             userLat,
             userLng
           ).toFixed(2);
-
+          console.log("accepted page:",req.user.name);
           return (
             <div key={req._id} className="request-card accepted">
               <div

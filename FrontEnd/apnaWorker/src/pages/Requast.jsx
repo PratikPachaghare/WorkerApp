@@ -9,7 +9,9 @@ import { Loader2 } from '../componets/Loder/Loader';
 const Requast = () => {
   const [Lodding,setLodding] = useState(false);
   const User = useSelector((state) => state.user.userData);
-  const isWorker = useSelector((state)=> state.user.isWorker);
+  console.log(User);
+  const isWorker = useSelector((state)=> state.user.isWorker)=='true';
+  console.log(isWorker);
   const [activeTab, setActiveTab] = useState('request');
   const [pending, setPending] = useState([]);
   const [accepted, setAccepted] = useState([]);
@@ -48,10 +50,11 @@ const Requast = () => {
   useEffect(() => {
     
     setTimeout(()=>{
+      console.log(User.location.coordinates[0]);
       setWorkerLng(User.location.coordinates[0])
       setWorkerLat(User.location.coordinates[1])
       handalRequastData();
-    },50)
+    },100)
     
   }, []);
 

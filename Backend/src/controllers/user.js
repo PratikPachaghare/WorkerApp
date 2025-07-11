@@ -19,7 +19,7 @@ export const registerUser = async (req, res) => {
       phone,
       location:{
         type:"Point",
-        coordinates:[longitude,latitude]
+        coordinates:[parseFloat(longitude),parseFloat(latitude)]
       },
       address
     });

@@ -6,14 +6,10 @@ import mongoose from "mongoose";
 export const createRequest = async (req, res) => {
   try {
     const { user, worker, message,requestedDate,requestedTime, longtitude , latitude,userAddress,} = req.body;
-
-      console.log(req.file.path);
-
     // Image upload logic
     let imageUrl = "";
     if (req.file) {
       const localPath = req.file.path;
-      console.log(localPath);
       const result = await uploadOnCloudinery(localPath);
       fs.unlinkSync(localPath); // Remove local file
       imageUrl = result?.secure_url || "";

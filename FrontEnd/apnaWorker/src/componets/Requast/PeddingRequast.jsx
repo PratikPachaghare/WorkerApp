@@ -4,7 +4,7 @@ import { useSelector } from 'react-redux';
 
 export default function PeddingRequast({ pending = [], handleAccept, handleReject }) {
   const [lightboxImage, setLightboxImage] = useState(null);
-  const isWorker = useSelector((state)=> state.user.isWorker);
+  const isWorker = useSelector((state)=> state.user.isWorker)=='true';
 
   return (
     <div>
